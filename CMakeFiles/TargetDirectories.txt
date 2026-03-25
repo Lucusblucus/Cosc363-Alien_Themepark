@@ -1,0 +1,3 @@
+C:/Users/lucus/OneDrive - University of Canterbury/Classes/3rd Year/Cosc363/Assignment/CMakeFiles/Themepark.out.dir
+C:/Users/lucus/OneDrive - University of Canterbury/Classes/3rd Year/Cosc363/Assignment/CMakeFiles/edit_cache.dir
+C:/Users/lucus/OneDrive - University of Canterbury/Classes/3rd Year/Cosc363/Assignment/CMakeFiles/rebuild_cache.dir
