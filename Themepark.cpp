@@ -14,14 +14,14 @@ using namespace std;
 //-- Globals ---------------------------------------------------------------
 float angle=0., look_x=0., look_z=0., eye_x=0., eye_y=5., eye_z=10.;
 bool wireframe = false; //Varible to track if wireframe is active
+float armAngle = 0;
 
-int turndirection=0;
-int movedirection=0;
+int turndirection=0, movedirection=0, updirection=0;
 
 GLuint txId[2];	//Texture ids
 
 //Init Aliens
-Alien alien1 = {0, 2, -2, false};
+Alien alien1 = {0, 2,-2, false, false, false};
 
 //-- Draws a grid of lines on the floor plane ------------------------------
 void drawFloor() {
@@ -76,19 +76,20 @@ void skyBox(void)
 }
 
 //-- Draws the Ferris wheel ----------------
-void drawFerris() {
+void drawFerris(bool shadow) {
+	glTranslatef(0, 18, -5);
 	//Supports
-	glColor4f(0.8, 0., 0., 1.);	
+	if (!shadow) {glColor4f(0.5, 0.5, 0.5, 1);}	
 	drawSupport();
 
 	//Wheel, Seats
 	glPushMatrix();
 		glRotatef(wheel_angle, 0, 0, 1);
 
-		glColor4f(0.5, 0., 0., 1.);	
+		if (!shadow) {glColor4f(0.5, 0., 0., 1.);}	
 		drawWheel();
 
-		glColor4f(0, 0, 0.5, 1.);
+		if (!shadow) {glColor4f(0, 0, 0.5, 1.);}
 		drawSeats();
 	glPopMatrix();
 }
@@ -101,6 +102,7 @@ void movement(void)
 	look_z = eye_z - 10*cos(angle);
 	eye_x += 0.4*sin(angle) * movedirection;
 	eye_z -= 0.4*cos(angle) * movedirection;
+	eye_y += 0.5 * updirection;
 }
 
 void myTimer(int value) {
@@ -116,7 +118,7 @@ void myTimer(int value) {
 //-- This is the main display module containing function calls for generating
 //-- the scene.
 void display() {
-	float light[4] = {10., 10., 10., 1.};	//light's position
+	float light[4] = {50., 100., 50., 1.};	//light's position
 	float shadowMat[16] = {light[1], 0, 0, 0, -light[0], 0, -light[2],-1,
  							0, 0, light[1], 0, 0, 0, 0, light[1]};
 
@@ -134,21 +136,25 @@ void display() {
 	if (!alien1.FerrisRiding) {
 		drawAlien(&alien1);
 	}
-	
+
 	glPushMatrix();
-		glTranslatef(0, 18, -5);
-		drawFerris();
+		drawFerris(false);
 	glPopMatrix();
 
 	glPushMatrix();
 		glTranslatef(0, 19, -5);
 		glRotatef(wheel_angle, 0, 0, 1);
-		if (alien1.FerrisRiding) {
-			drawAlien(&alien1);
-		}
+		if (alien1.FerrisRiding) {drawAlien(&alien1);}
 	glPopMatrix();
 
 	glDisable(GL_LIGHTING);	
+
+	glColor3f(0.2, 0.2, 0.2);
+	glPushMatrix();
+		glTranslatef(0., 0.1, 0.);
+		glMultMatrixf(shadowMat);
+		drawFerris(true);
+	glPopMatrix();
 
 	glFlush();
 }
@@ -184,18 +190,14 @@ void initialize() {
 //-- Special key event callback --------------------------------------------
 //-- To enable the use of keys to move about the screen
 void special(int key, int x, int y) {
-	if		(key == GLUT_KEY_LEFT)  {turndirection = -1;}	//Change direction
-	else if (key == GLUT_KEY_RIGHT) {turndirection =  1;}
+	if		(key == GLUT_KEY_LEFT)  {turndirection = -1;}//Rotate Left
+	else if (key == GLUT_KEY_RIGHT) {turndirection =  1;}//Rotate Right
 
-	if (key == GLUT_KEY_DOWN)  {	//Move backward
-		movedirection = -1;
-	}
-	else if (key == GLUT_KEY_UP)	{	//Move forward
-		movedirection = 1;
-	}
-	else if (key == GLUT_KEY_PAGE_UP) {eye_y += 0.5;}  //Move up
-	else if (key == GLUT_KEY_PAGE_DOWN) {eye_y -= 0.5;}//Move down
+	if   	(key == GLUT_KEY_DOWN) {movedirection = -1;}//Move backward
+	else if (key == GLUT_KEY_UP)   {movedirection = 1;} //Move forward
 
+	if		(key == GLUT_KEY_PAGE_UP)   {updirection = 1;} //Move up
+	else if (key == GLUT_KEY_PAGE_DOWN) {updirection = -1;}//Move down
 
 	glutPostRedisplay();
 }
@@ -207,6 +209,9 @@ void specialUp(int key, int x, int y)
 	}
 	if (key == GLUT_KEY_UP || key == GLUT_KEY_DOWN) {
 		movedirection = 0;
+	}
+	if (key == GLUT_KEY_PAGE_UP || key == GLUT_KEY_PAGE_DOWN) {
+		updirection = 0;
 	}
 }
 

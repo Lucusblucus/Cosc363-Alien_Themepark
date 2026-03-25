@@ -9,8 +9,12 @@ struct Alien {
     float x;
     float y;
     float z;
+    bool rightarmwaving;
+    bool leftarmwaving;
     bool FerrisRiding = false;
 };
+
+extern float armAngle;
 
 void drawAlien(Alien*);
 

@@ -25,14 +25,26 @@ glPushMatrix();
     glPopMatrix();
 
     glColor4f(0.4, 0.4, 0.4, 1);
-
+    
     GLUquadric *q = gluNewQuadric();
     glPushMatrix(); //Left Arm
-        glTranslatef(.5, -2, 0);
-        glRotatef(30, 0, 0, 1);
-        glTranslatef(-0.5, 2, 0);
         glTranslatef(0.5, 0.4, 0);
+        if ( alien -> leftarmwaving) {glRotatef(30*sin(0.3*armAngle) + 180, 0, 0, 1);}
+        else {glRotatef(5, 0, 0, 1);}
+        glRotatef(70, 1, 0, 0);
 		gluCylinder(q, .1, .1, 1., 20, 5);
+        glTranslatef(0, 0, 1);
+        glutSolidSphere(.12, 36, 17);
+    glPopMatrix();
+
+    glPushMatrix(); //Right Arm
+        glTranslatef(-0.5, 0.4, 0);
+        if ( alien -> rightarmwaving) {glRotatef(-30*sin(0.3*armAngle) + 180, 0, 0, 1);}
+        else {glRotatef(-5, 0, 0, 1);}
+        glRotatef(70, 1, 0, 0);
+		gluCylinder(q, .1, .1, 1., 20, 5);
+        glTranslatef(0, 0, 1);
+        glutSolidSphere(.12, 36, 17);
     glPopMatrix();
 
     //Body

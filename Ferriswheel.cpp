@@ -62,7 +62,7 @@ glPopMatrix();
 
 void drawSupport(void)
 {
-    glColor4f(0.5, 0.5, 0.5, 1);
+    
     GLUquadric *q = gluNewQuadric();	
 
         //Left front support
