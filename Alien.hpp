@@ -11,11 +11,12 @@ struct Alien {
     float z;
     bool rightarmwaving;
     bool leftarmwaving;
-    bool FerrisRiding = false;
+    bool moving;
+    bool FerrisRiding;
 };
 
-extern float armAngle;
+extern float Angle;
 
-void drawAlien(Alien*);
+void drawAlien(Alien*, bool);
 
 #endif

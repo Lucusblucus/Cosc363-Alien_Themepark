@@ -14,7 +14,7 @@ using namespace std;
 //-- Globals ---------------------------------------------------------------
 float angle=0., look_x=0., look_z=0., eye_x=0., eye_y=5., eye_z=10.;
 bool wireframe = false; //Varible to track if wireframe is active
-float armAngle = 0;
+float Angle = 0;
 
 int turndirection=0, movedirection=0, updirection=0;
 
@@ -75,6 +75,15 @@ void skyBox(void)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+//Box for Alien to stand on
+void drawBox(bool shadow)
+{
+	if (!shadow) {glColor4f(0.2, 0.5, 0.5, 1);}
+	glTranslatef(0, 0.8, -2);
+	glScalef(2, 0.6, 1);
+	glutSolidCube(2);
+}
+
 //-- Draws the Ferris wheel ----------------
 void drawFerris(bool shadow) {
 	glTranslatef(0, 18, -5);
@@ -108,6 +117,7 @@ void movement(void)
 void myTimer(int value) {
 	
 	aniMain(&alien1);
+	rinkAni();
 	movement();
 
 	glutPostRedisplay();
@@ -118,13 +128,14 @@ void myTimer(int value) {
 //-- This is the main display module containing function calls for generating
 //-- the scene.
 void display() {
-	float light[4] = {50., 100., 50., 1.};	//light's position
+	float light[4] = {50., 150., 50., 1.};	//light's position
 	float shadowMat[16] = {light[1], 0, 0, 0, -light[0], 0, -light[2],-1,
  							0, 0, light[1], 0, 0, 0, 0, light[1]};
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
 	gluLookAt(eye_x, eye_y, eye_z, look_x, eye_y, look_z, 0., 1., 0.);
 	glLightfv(GL_LIGHT0,GL_POSITION, light);   //Set light position
 
@@ -132,11 +143,15 @@ void display() {
 	glEnable(GL_LIGHTING);	
 	skyBox();
 
+	rinkMain(false);
+
 	drawFloor();
 	if (!alien1.FerrisRiding) {
-		drawAlien(&alien1);
+		drawAlien(&alien1, false);
 	}
-
+	glPushMatrix();
+		drawBox(false);	
+	glPopMatrix();
 	glPushMatrix();
 		drawFerris(false);
 	glPopMatrix();
@@ -144,16 +159,25 @@ void display() {
 	glPushMatrix();
 		glTranslatef(0, 19, -5);
 		glRotatef(wheel_angle, 0, 0, 1);
-		if (alien1.FerrisRiding) {drawAlien(&alien1);}
+		if (alien1.FerrisRiding) {drawAlien(&alien1, false);}
 	glPopMatrix();
 
 	glDisable(GL_LIGHTING);	
 
 	glColor3f(0.2, 0.2, 0.2);
 	glPushMatrix();
-		glTranslatef(0., 0.1, 0.);
+		glTranslatef(0., 0.15, 0.);
 		glMultMatrixf(shadowMat);
-		drawFerris(true);
+		glPushMatrix();
+			drawFerris(true);
+		glPopMatrix();
+		glPushMatrix();
+			drawBox(true);
+		glPopMatrix();
+		glPushMatrix();
+			rinkMain(true);
+		glPopMatrix();
+		
 	glPopMatrix();
 
 	glFlush();
@@ -179,7 +203,6 @@ void initialize() {
 	glEnable(GL_TEXTURE_2D);
 
 	loadTexture();
-
 	loadWheel();
  
 	glMatrixMode(GL_PROJECTION);

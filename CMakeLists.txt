@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8...3.5)
 
 project(assignment)
 
-add_executable(Themepark.out Themepark.cpp Ferriswheel.cpp Animation.cpp Alien.cpp)
+add_executable(Themepark.out Themepark.cpp Ferriswheel.cpp Animation.cpp Alien.cpp Iceskate.cpp)
 
 set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
