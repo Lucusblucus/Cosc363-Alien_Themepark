@@ -13,7 +13,7 @@ extern float wheel_angle;
 struct Alien;
 
 void loadWheel(void);
-void drawWheel(void);
+void drawWheel(bool shadow);
 void drawSupport(void);
 void drawSeats(void);
 

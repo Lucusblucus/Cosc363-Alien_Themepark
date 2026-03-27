@@ -15,10 +15,11 @@ using namespace std;
 float angle=0., look_x=0., look_z=0., eye_x=0., eye_y=5., eye_z=10.;
 bool wireframe = false; //Varible to track if wireframe is active
 float Angle = 0;
+float spotlight = 0;
 
 int turndirection=0, movedirection=0, updirection=0;
 
-GLuint txId[2];	//Texture ids
+GLuint txId[3];	//Texture ids
 
 //Init Aliens
 Alien alien1 = {0, 2,-2, false, false, false};
@@ -51,14 +52,29 @@ void drawFloor() {
 
 //--------------------------------------------------------------------------
 void loadTexture() {
-	glGenTextures(2, txId); // Create 2 texture ids
+	glGenTextures(3, txId); // Create 3 texture ids
 
-	glBindTexture(GL_TEXTURE_2D, txId[0]);	//Use this texture
-	loadTGA("Skybox.tga");
+	glBindTexture(GL_TEXTURE_2D, txId[0]);	
+	loadTGA("Objects/Skybox.tga");
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	//Set texture parameters
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
 	
 	glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+
+	glBindTexture(GL_TEXTURE_2D, txId[1]);	
+	loadTGA("Objects/Ice.tga");
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	//Set texture parameters
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
+	
+	glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+
+	glBindTexture(GL_TEXTURE_2D, txId[2]);	
+	loadTGA("Objects/Metal.tga");
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);	//Set texture parameters
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
+	
+	glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+
 }
 
 void skyBox(void)
@@ -96,7 +112,7 @@ void drawFerris(bool shadow) {
 		glRotatef(wheel_angle, 0, 0, 1);
 
 		if (!shadow) {glColor4f(0.5, 0., 0., 1.);}	
-		drawWheel();
+		drawWheel(shadow);
 
 		if (!shadow) {glColor4f(0, 0, 0.5, 1.);}
 		drawSeats();
@@ -119,6 +135,7 @@ void myTimer(int value) {
 	aniMain(&alien1);
 	rinkAni();
 	movement();
+	spotlight++;
 
 	glutPostRedisplay();
 	glutTimerFunc(16, myTimer, value);
@@ -128,9 +145,19 @@ void myTimer(int value) {
 //-- This is the main display module containing function calls for generating
 //-- the scene.
 void display() {
-	float light[4] = {50., 150., 50., 1.};	//light's position
+	float light[4] = {0., 75., 25., 1.};	//light's position
 	float shadowMat[16] = {light[1], 0, 0, 0, -light[0], 0, -light[2],-1,
  							0, 0, light[1], 0, 0, 0, 0, light[1]};
+
+	float spotColor[4] = {
+		0.5f * (sinf(0.3f*spotlight) + 1.0f),
+		0.5f * (sinf(0.3f*spotlight + 2.0f) + 1.0f),
+		0.5f * (sinf(0.3f*spotlight + 4.0f) + 1.0f),
+		1.0f
+	};
+
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, spotColor);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, spotColor);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 	glMatrixMode(GL_MODELVIEW);
@@ -143,6 +170,7 @@ void display() {
 	glEnable(GL_LIGHTING);	
 	skyBox();
 
+	drawRink();
 	rinkMain(false);
 
 	drawFloor();
@@ -188,14 +216,23 @@ void initialize() {
 	glClearColor(.5, .5, .5, 1.);	//Background colour
 	float white[4]  = {1., 1., 1., 1.};
 
+
+
 	glEnable(GL_LIGHTING);			//Enable OpenGL states
-	glEnable(GL_LIGHT0);
+	
 
 	//	Define light's diffuse, specular properties
+	glEnable(GL_LIGHT0);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, white);	//Default, only for LIGHT0
 	glLightfv(GL_LIGHT0, GL_SPECULAR, white);	//Default, only for LIGHT0
 	glMaterialfv(GL_FRONT, GL_SPECULAR, white);
 	glMaterialf(GL_FRONT, GL_SHININESS, 50);
+	//glDisable(GL_LIGHT0);
+
+	//  Light1, Spotlight
+	glEnable(GL_LIGHT1);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 30.0);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 0);
 
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);

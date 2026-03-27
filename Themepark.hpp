@@ -6,6 +6,6 @@
 #include "Alien.hpp"
 #include "Iceskate.hpp"
 
-
+extern GLuint txId[3]; //Texture Ids
 
 #endif

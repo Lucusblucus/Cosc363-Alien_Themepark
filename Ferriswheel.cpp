@@ -14,7 +14,6 @@ std::vector<vec3d>  out_normals;
 void loadWheel(void)
 {
 	//Load Scene from OBJ file
-	//loadOBJ("Objects/Scene.obj", out_vertices, out_uvs, out_normals);
 	loadOBJ("Objects/Wheel.obj", out_vertices, out_uvs, out_normals);
 }
 
@@ -40,9 +39,12 @@ glPushMatrix();
 glPopMatrix();
 }
 
-void drawWheel(void)
+void drawWheel(bool shadow)
 {
 glPushMatrix();
+
+    if (!shadow ) {
+    glBindTexture(GL_TEXTURE_2D, txId[2]);}
 
     glRotatef(9, 0, 0, 1);
     glRotatef(90, 0, 1, 0);
@@ -58,6 +60,8 @@ glPushMatrix();
 	glEnd();
 
 glPopMatrix();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void drawSupport(void)

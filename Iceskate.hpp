@@ -3,6 +3,7 @@
 
 #include "Themepark.hpp"
 
+void drawRink(void);
 void rinkAni(void);
 void rinkMain(bool shadow);
 

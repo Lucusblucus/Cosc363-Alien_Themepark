@@ -2,27 +2,13 @@
 #include <math.h>
 #include <climits>
 #include <list>
-#include "loadBMP.h"
-
-GLUquadric *q;		//Quadric object (required for drawing a cylinder)
-GLuint txId1;		
-int tick = 0;		
-
-struct particle	{	//A particle 
-	int t;			//Life time  (0 - 200)
-	float col;		//Color  (0 - 1)
-	float size;		//Size   (5 - 25)
-	float pos[3];	//Position
-	float vel[3];	//Velocity
-};
-
-list<particle> parList;	//List of particles
+	
 
 static float icetime;
 static int scale = 10;
 static float speed = 0.005;
 
-Alien iceAlien = {0, 0, 0, false, false, false, false};
+Alien iceAlien = {0, 0, 0, true, false, false, false};
 
 //Sweepsurface init
 #define NUM_SEGMENTS 20
@@ -32,32 +18,48 @@ float thickness = 5;
 
 void drawRink(void)
 {
-	glColor4f(0.5, .9, 1, 1.0);
-	glNormal3f(0.0, 1.0, 0.0);
+	glColor4f(0.2, .5, 0.7, 1.0);
+
+	float white[4] = {1., 1., 1., 1.};
+	glBindTexture(GL_TEXTURE_2D, txId[1]);
 
 	glBegin(GL_QUADS);
 	for(int i = -30; i < 30; i++)	{
 		for(int j = 10;  j < 60; j++) {
-			glVertex3f(i, 0, j);
-			glVertex3f(i, 0, j+1);
-			glVertex3f(i+1, 0, j+1);
-			glVertex3f(i+1, 0, j);
+
+			glNormal3f(0.0, 1.0, 0.0);
+
+			glTexCoord2f(0, 1);
+			glVertex3f(i, 0.1, j);
+			glTexCoord2f(0, 0);
+			glVertex3f(i, 0.1, j+1);
+			glTexCoord2f(1, 0);
+			glVertex3f(i+1, 0.1, j+1);
+			glTexCoord2f(1, 1);
+			glVertex3f(i+1, 0.1, j);
 		}
 	}
 	glEnd();
 
-
+	glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void drawRinkWalls(bool shadow)
 {
+	float spotpos[] = {0, 20, 45, 1};
+	float spotdir[] = {0, 0.5f*sin(0.035f*Angle), 1}; //Spotlight dir
+
 	//Sweepsurface Semicircle
 	if (!shadow) {glColor4f(.5, .5, .5, 1.0);}
 
+	//Spotlight
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spotdir);
+	glLightfv(GL_LIGHT1, GL_POSITION, spotpos);
 
 glPushMatrix();
 	glTranslatef(0,0,60);
-		
+
 	glBegin(GL_QUAD_STRIP);
 	for (int i = 0; i <= NUM_SEGMENTS; i++) {
 		float theta = 3.14159 * i / NUM_SEGMENTS; 
@@ -92,6 +94,18 @@ glPushMatrix();
 	}
 	glEnd();
 
+//Right and Left wall
+	glPushMatrix();
+		glTranslatef(-30, 0.5, -25);
+		glScalef(1, 1, 50);
+		glutSolidCube(1);
+	glPopMatrix();
+	glPushMatrix();
+		glTranslatef(30, 0.5, -25);
+		glScalef(1, 1, 50);
+		glutSolidCube(1);
+	glPopMatrix();
+
 glPopMatrix();
 }
 
@@ -99,16 +113,13 @@ void rinkAni(void)
 {
     icetime++;
 	if (icetime == INT_MAX) icetime = 0;
-	tick++;
-	if (tick == INT_MAX) tick = 0;
+
 
 }
 
 void rinkMain(bool shadow)
 {
 	drawRinkWalls(shadow);
-
-	drawRink();
 
     float t = icetime * speed;
 
